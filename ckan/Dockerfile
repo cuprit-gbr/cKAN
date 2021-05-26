@@ -66,7 +66,6 @@ ENV GIT_BRANCH=ckan-2.9.3
 # Setup CKAN
 WORKDIR $CKAN_VENV/src/
 RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
-#ADD . $CKAN_VENV/src/ckan/
 RUN ckan-pip3 install -U pip && \
     ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
     ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \

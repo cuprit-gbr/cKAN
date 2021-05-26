@@ -14,12 +14,15 @@ services:
     container_name: ckan
     build:
       context: ckan/
-      args:
-          - CKAN_SITE_URL=${CKAN_SITE_URL}
+      #args:
+      #    - CKAN_SITE_URL=${CKAN_SITE_URL}
+    env_file:
+      - .env
     links:
       - db
       - solr
       - redis
+      - datapusher
     depends_on:
       - db
     ports:
