@@ -28,7 +28,7 @@ All environment variables needed to install and configure CKAN are described in 
 
 To build the Docker containers you should clone this repository in a machine with Docker and Docker-compose installed.
 
-We assume that the `docker-compose` commands are all run inside the root directory of this repository, where `docker-compose.yml` and `.env are located.
+We assume that the `docker-compose` commands are all run inside the root directory of this repository, where `docker-compose.yml` and `.env` are located.
 
 Build containers:
 
@@ -46,6 +46,12 @@ Restart ckan container:
 
 ```
 docker-compose restart ckan
+```
+
+Stopping all containers:
+
+```
+docker-compose down
 ```
 
 ## Check Logs
