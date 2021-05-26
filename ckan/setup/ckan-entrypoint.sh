@@ -75,7 +75,7 @@ echo "Initializating CKAN db"
 ckan --config "$CONFIG" db init
 
 # create sysadmin user
-if ckan --config "$CONFIG" user show ${CKAN_SYSADMIN_NAME} | grep -q 'User:None'; then
+if ckan --config "$CONFIG" user show ${CKAN_SYSADMIN_NAME} | grep -q 'User: None'; then
     echo "Creating sysadmin user"
     ckan --config "$CONFIG" user add ${CKAN_SYSADMIN_NAME} email=${CKAN_SYSADMIN_EMAIL} name=${CKAN_SYSADMIN_NAME} password=${CKAN_SYSADMIN_PASSWORD}
     ckan --config "$CONFIG" sysadmin add ${CKAN_SYSADMIN_NAME}
