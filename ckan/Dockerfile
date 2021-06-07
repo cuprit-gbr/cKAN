@@ -1,85 +1,105 @@
-# See CKAN docs on installation from Docker Compose on usage
-FROM ubuntu:focal-20210119
-MAINTAINER Open Knowledge
+FROM alpine:3.7
 
-# Set timezone
-ENV TZ=UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Setting the locale
-ENV LC_ALL=en_US.UTF-8       
-RUN apt-get update
-RUN apt-get install --no-install-recommends -y locales
-RUN sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen
-RUN dpkg-reconfigure --frontend=noninteractive locales 
-RUN update-locale LANG=${LC_ALL}
-
-# Install required system packages
-RUN apt-get -q -y update \
-    && DEBIAN_FRONTEND=noninteractive apt-get -q -y upgrade \
-    && apt-get -q -y install \
-        python3.6 \
-        python3-dev \
-        python3-pip \
-        python3-venv \
-        python3-wheel \
-        libpq-dev \
-        libxml2-dev \
-        libxslt-dev \
-        libgeos-dev \
-        libssl-dev \
-        libffi-dev \
-        postgresql-client \
-        build-essential \
-        git-core \
-        vim \
-        wget \
-        curl \
-    && apt-get -q clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Define environment variables
-ENV CKAN_HOME /usr/lib/ckan
-ENV CKAN_VENV $CKAN_HOME/venv
-ENV CKAN_CONFIG /etc/ckan
+# Internal environment variables
+ENV APP_DIR=/srv/app
+ENV SRC_DIR=/srv/app/src
+ENV CKAN_INI=${APP_DIR}/ckan.ini
+ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_STORAGE_PATH=/var/lib/ckan
-
-# Build-time variables specified by docker-compose.yml / .env
-ARG CKAN_SITE_URL
-
-# Create ckan user
-RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
-
-# Setup virtual environment for CKAN
-RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
-    python3 -m venv $CKAN_VENV && \
-    ln -s $CKAN_VENV/bin/pip3 /usr/local/bin/ckan-pip3 &&\
-    ln -s $CKAN_VENV/bin/ckan /usr/local/bin/ckan
-
-# Virtual environment binaries/scripts to be used first
-ENV PATH=${CKAN_VENV}/bin:${PATH}
-
-# Set CKAN version to build
 ENV GIT_URL=https://github.com/ckan/ckan.git
+# CKAN version to build
 ENV GIT_BRANCH=ckan-2.9.3
 
-# Setup CKAN
-WORKDIR $CKAN_VENV/src/
-RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
-RUN ckan-pip3 install -U pip && \
-    ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
-    ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \
-    ckan-pip3 install -e $CKAN_VENV/src/ckan/ && \
-    ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini
+WORKDIR ${APP_DIR}
 
-COPY setup/ckan-entrypoint.sh /ckan-entrypoint.sh
+# Set up environment variables
+ENV APP_DIR=/srv/app
+ENV TZ=UTC
+RUN echo ${TZ} > /etc/timezone
 
-RUN chmod +x /ckan-entrypoint.sh && \
-    chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
+# Install necessary packages to run CKAN
+RUN apk add --no-cache tzdata \
+        git \
+        gettext \
+        postgresql-client \
+        python3 \
+        apache2-utils \
+        libxml2 \
+        libxslt \
+        musl-dev \
+        uwsgi-http \
+        uwsgi-corerouter \
+        uwsgi-python3 \
+        py3-gevent \
+        uwsgi-gevent \
+        libmagic \
+        curl \
+        sudo && \
+    # Packages to build CKAN requirements and plugins
+    apk add --no-cache --virtual .build-deps \
+        postgresql-dev \
+        gcc \
+        make \
+        g++ \
+        autoconf \
+        automake \
+	    libtool \
+        python3-dev \
+        py3-virtualenv \
+        libxml2-dev \
+        libxslt-dev \
+        linux-headers && \
+    # Create SRC_DIR
+    mkdir -p ${SRC_DIR} && \
+    # Install pip
+    curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
+    python3 ${SRC_DIR}/get-pip.py 'pip==20.3.3' && \     
+    rm -rf ${SRC_DIR}/get-pip.py
 
-ENTRYPOINT ["/ckan-entrypoint.sh"]
+# Set up Python3 virtual environment
+RUN cd ${APP_DIR} && \
+    python3 -m venv ${APP_DIR} && \
+    source ${APP_DIR}/bin/activate
 
-USER ckan
+# Virtual environment binaries/scripts to be used first
+ENV PATH=${APP_DIR}/bin:${PATH}   
+    
+# Install CKAN and uwsgi
+RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \ 
+    pip3 install uwsgi && \
+    cd ${SRC_DIR}/ckan && \
+    cp who.ini ${APP_DIR} && \
+    pip install --no-binary :all: -r requirements.txt && \
+    # Install CKAN envvars to support loading config from environment variables
+    pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+    # Create and update CKAN config
+    ckan generate config ${CKAN_INI}
+
+# Install and configure supervisor
+RUN pip3 install supervisor && \
+mkdir /etc/supervisord.d
+
+# Copy all setup files
+COPY setup ${APP_DIR}
+COPY setup/supervisor.worker.conf /etc/supervisord.d/worker.conf
+COPY setup/supervisord.conf /etc/supervisord.conf
+
+# Create a local user and group to run the app
+RUN addgroup -g 92 -S ckan && \
+    adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
+
+# Create local storage folder
+RUN mkdir -p $CKAN_STORAGE_PATH
+RUN chown -R ckan:ckan $CKAN_STORAGE_PATH
+
+# Create entrypoint directory for children image scripts
+ONBUILD RUN mkdir /docker-entrypoint.d
+
+RUN chown -R ckan:ckan ${APP_DIR}
+RUN chmod u+x /srv/app/start_ckan.sh
+
 EXPOSE 5000
 
-CMD ["ckan","-c","/etc/ckan/production.ini", "run", "--host", "0.0.0.0"]
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://localhost:5000/api/3/action/status_show || exit 1
+
+CMD ["/srv/app/start_ckan.sh"]
