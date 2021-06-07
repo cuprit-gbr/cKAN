@@ -27,6 +27,8 @@ services:
         - TZ=${TZ}
     env_file:
       - .env
+    depends_on:
+      - "db"
     links:
       - db
       - solr
