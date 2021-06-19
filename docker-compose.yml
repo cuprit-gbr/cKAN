@@ -10,17 +10,34 @@ services:
     container_name: traefik
     # Enables the web UI and tells Traefik to listen to docker
     command:
-      - --api.insecure=true
+      - --api.insecure=false
       - --providers.docker
       - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker.exposedbydefault=false
+      - --certificatesresolvers.leresolver.acme.email=me@example.com
+      - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.leresolver.acme.tlschallenge=true
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     networks:
       - http
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    labels:
+      - "traefik.enable=true"
+
+      # global redirect to https
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+
+      # middleware redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
   nginx:
     container_name: nginx
@@ -37,7 +54,11 @@ services:
       - "ckan"
     restart: on-failure
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`ckan-dev.cuprit.net`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=leresolver"
 
   ckan:
     container_name: ckan
