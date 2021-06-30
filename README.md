@@ -1,18 +1,21 @@
 # CKAN Docker Compose for CSGIS
 
-This Docker Compose environment was built for CSGIS, and it is based on the [CKAN Docker Compose](https://github.com/ckan/ckan/tree/master/contrib/docker) found in the CKAN official repo. After building and running the docker-compose environment, the following containers should be created adn running:
+This Docker Compose environment was built for CSGIS, and it is based on the [CKAN Docker Compose](https://github.com/ckan/ckan-docker) found in the CKAN official repo. 
+
+After building and running the docker-compose environment, the following containers should be created and running:
 * db (postgis)
 * solr
 * redis
-* datapusher (used to send files to the datastore)
+* datapusher
 * ckan
+* nginx
+* traefik
 
-We created a custom `/ckan-entrypoint.sh` script that automates a few configuration steps commonly taken when deploying CKAN  to a development or a production environment. These tasks are described below:
-* setup `ckan.plugins` environment variable to enable plugins such as datastore and datapusher
-* create sysadmin user based on the credentials provided on the `.env` file
-* initialize the datastore database and add the required permissions
+[Traefik](https://doc.traefik.io/traefik/) implements a reverse proxy and enables certificates for HTTPS traffic. [Nginx](https://www.nginx.com/) implements a web server that communicates directly to CKAN via [uWSGI](https://uwsgi-docs.readthedocs.io/en/latest/).
 
-Another key aspect of this custom Docker Compose is that we don’t need to clone CKAN and navigate to the `ckan/contrib/docker directory` because the Dockerfile installs CKAN in the container based on an environment variable present in the Dockerfile. Check `/ckan/Dockefile` in this repository.
+```
+Traefik <=> Nginx <=> CKAN
+```
 
 You can find more details about installing and configuring CKAN with Docker Compose at CKAN Documentation: https://docs.ckan.org/en/2.9/maintaining/installing/install-from-docker-compose.html
 
@@ -23,6 +26,30 @@ All environment variables needed to install and configure CKAN are described in 
 * All variable in the Email settings section
 * POSTGRES_PASSWORD
 * All variable in the Sysadmin settings section
+
+The [ckanext-envvars](https://github.com/okfn/ckanext-envvars) checks for environmental variables conforming to an expected format and updates the corresponding CKAN config settings with its value.
+
+For the extension to correctly identify which env var keys map to the format used for the config object, env var keys should be formatted in the following way:
+
+1. All uppercase
+2. Replace periods ('.') with two underscores ('__')
+3. Keys must begin with 'CKAN' or 'CKANEXT'
+
+Some examples:
+
+```
+ckan.site_id --> CKAN__SITE_ID
+ckanext.s3filestore.aws_bucket_name --> CKANEXT__S3FILESTORE__AWS_BUCKET_NAME
+```
+
+For keys that don't normally begin with 'CKAN', add 'CKAN___' (3 underscores) to the beginning to help the extension identify these keys, e.g.:
+
+```
+sqlalchemy.url --> CKAN___SQLALCHEMY__URL
+beaker.session.secret --> CKAN___BEAKER__SESSION__SECRET
+```
+
+A complete list of CKAN config variables can be found [here](https://docs.ckan.org/en/2.9/maintaining/configuration.html).
 
 ## Build Docker images
 
