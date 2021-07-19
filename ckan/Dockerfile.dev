@@ -6,6 +6,7 @@ ENV SRC_DIR=/srv/app/src
 ENV CKAN_INI=${APP_DIR}/ckan.ini
 ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_STORAGE_PATH=/var/lib/ckan
+ENV SRC_EXTENSIONS_DIR=/srv/app/src_extensions
 ENV GIT_URL=https://github.com/ckan/ckan.git
 # CKAN version to build
 ENV GIT_BRANCH=ckan-2.9.3
@@ -72,8 +73,6 @@ RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     pip install --no-binary :all: -r requirements.txt && \
     # Install CKAN envvars to support loading config from environment variables
     pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
-    # Install ckanext-cuprit
-    pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
     # Create and update CKAN config
     ckan generate config ${CKAN_INI}
 
@@ -105,3 +104,29 @@ EXPOSE 5000
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl --fail http://localhost:5000/api/3/action/status_show || exit 1
 
 CMD ["/srv/app/start_ckan.sh"]
+
+# Install packages needed by the dev requirements
+RUN apk add --no-cache libffi-dev
+
+# Set up Python3 virtual environment
+RUN cd ${APP_DIR} && \
+    source ${APP_DIR}/bin/activate
+
+# Virtual environment binaries/scripts to be used first
+ENV PATH=${APP_DIR}/bin:${PATH} 
+
+# Install CKAN dev requirements
+# Will need to change this eventually - when CKAN 2.9 is out
+# wget https://raw.githubusercontent.com/ckan/ckan/master/dev-requirements.txt
+# RUN pip3 install --no-binary :all: -r https://raw.githubusercontent.com/ckan/ckan/master/dev-requirements.txt
+#RUN pip3 install -r https://raw.githubusercontent.com/ckan/ckan/master/dev-requirements.txt
+COPY dev-requirements.txt ${APP_DIR}/dev-requirements.txt
+RUN pip3 install -r ${APP_DIR}/dev-requirements.txt
+
+# Create folder for local extensions sources
+RUN mkdir $SRC_EXTENSIONS_DIR
+
+COPY setup/start_ckan_development.sh ${APP_DIR}
+RUN chmod u+x ${APP_DIR}/start_ckan_development.sh
+
+CMD ["/srv/app/start_ckan_development.sh"]

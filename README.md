@@ -81,6 +81,32 @@ Stopping all containers:
 docker-compose down
 ```
 
+## Development setup
+
+There is a docker-compose set up for development purposes. You can use it for extensions development.
+
+To add a local extension directory to the CKAN container, you can mount a volume into the container to link your local directory. Edit the `docker-compose.dev.yml` file to mount the volume, for example:
+
+```
+volumes:
+    - ckan_storage:/var/lib/ckan
+    - ./src:/srv/app/src_extensions
+    # debug extensions
+    - path_to_your_local_extension_dir/ckanext-cuprit:/srv/app/src_extensions/ckanext-cuprit
+```
+
+To build the images:
+
+```
+docker-compose -f docker-compose.dev.yml build
+```
+
+To start the containers:
+
+```
+docker-compose -f docker-compose.dev.yml up
+```
+
 ## Check Logs
 
 Check logs in the ckan container:
