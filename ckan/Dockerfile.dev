@@ -66,10 +66,11 @@ RUN cd ${APP_DIR} && \
 ENV PATH=${APP_DIR}/bin:${PATH}   
     
 # Install CKAN and uwsgi
-RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \ 
+RUN pip install --upgrade pip && pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \ 
     pip3 install uwsgi && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
+    sed -i 's/lxml==4.4.2/lxml==4.6.3/g' requirements.txt && \
     pip install --no-binary :all: -r requirements.txt && \
     # Install CKAN envvars to support loading config from environment variables
     pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
