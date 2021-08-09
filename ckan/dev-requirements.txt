@@ -20,4 +20,4 @@ pytest-split-tests==1.0.9
 pytest-cov==2.12.1
 pytest-freezegun==0.4.2
 pytest-rerunfailures==9.1.1
-towncrier==19.2.0
+towncrier==21.3.0
