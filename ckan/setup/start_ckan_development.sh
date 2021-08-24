@@ -62,7 +62,7 @@ ckan config-tool $SRC_DIR/ckan/test-core.ini \
     "ckan.redis_url = $TEST_CKAN_REDIS_URL"
 
 # Run the prerun script to init CKAN and create the default admin user
-#sudo -u ckan -EH python prerun.py
+sudo -u ckan -EH python prerun.py
 
 # Run any startup scripts provided by images extending this one
 if [[ -d "/docker-entrypoint.d" ]]
@@ -79,10 +79,6 @@ fi
 
 # Start supervisord
 supervisord --configuration /etc/supervisord.conf &
-
-# Fix DB iniit - Why do we need it here?
-echo "Reeinit Database"
-ckan db init
 
 # Start the development server with automatic reload
 # Check the --reloader options sudo -u ckan -EH ckan -c $CKAN_INI run --reloader <TEXT>
