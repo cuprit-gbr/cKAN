@@ -114,3 +114,14 @@ Check logs in the ckan container:
 ```
 docker-compose logs -f ckan
 ```
+
+# Before you upgrade from 2.9.3
+
+Please check if following issue is resolved. 
+
+https://github.com/ckan/ckan/issues/4576
+
+And if so, remove the patch:
+https://github.com/cuprit-gbr/cKAN/blob/master/ckan/Dockerfile#L107-L110
+
+
