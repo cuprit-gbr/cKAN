@@ -1,6 +1,6 @@
-# CKAN Docker Compose for CSGIS
+# CKAN Docker Compose
 
-This Docker Compose environment was built for CSGIS, and it is based on the [CKAN Docker Compose](https://github.com/ckan/ckan-docker) found in the CKAN official repo. 
+This Docker Compose environment is based on the [CKAN Docker Compose](https://github.com/ckan/ckan-docker) found in the CKAN official repo.
 
 After building and running the docker-compose environment, the following containers should be created and running:
 * db (postgis)
