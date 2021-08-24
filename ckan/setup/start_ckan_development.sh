@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# wait until database is ready before anything else
+/usr/bin/wait-for-databases db
+
 # Install any local extensions in the src_extensions volume
 echo "Looking for local extensions to install..."
 echo "Extension dir contents:"

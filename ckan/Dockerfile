@@ -53,7 +53,7 @@ RUN apk add --no-cache tzdata \
     mkdir -p ${SRC_DIR} && \
     # Install pip
     curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
-    python3 ${SRC_DIR}/get-pip.py 'pip==20.3.3' && \     
+    python3 ${SRC_DIR}/get-pip.py 'pip==20.3.3' && \
     rm -rf ${SRC_DIR}/get-pip.py
 
 # Set up Python3 virtual environment
@@ -62,10 +62,10 @@ RUN cd ${APP_DIR} && \
     source ${APP_DIR}/bin/activate
 
 # Virtual environment binaries/scripts to be used first
-ENV PATH=${APP_DIR}/bin:${PATH}   
-    
+ENV PATH=${APP_DIR}/bin:${PATH}
+
 # Install CKAN and uwsgi
-RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \ 
+RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     pip3 install uwsgi && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
@@ -99,6 +99,10 @@ ONBUILD RUN mkdir /docker-entrypoint.d
 
 RUN chown -R ckan:ckan ${APP_DIR}
 RUN chmod u+x /srv/app/start_ckan.sh
+
+# helper script for database
+COPY wait-for-databases.sh /usr/bin/wait-for-databases
+RUN chmod +x /usr/bin/wait-for-databases
 
 EXPOSE 5000
 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# wait until database is ready before anything else
+/usr/bin/wait-for-databases db
+
 # Run the prerun script to init CKAN and create the default admin user
 sudo -u ckan -EH python3 prerun.py
 
