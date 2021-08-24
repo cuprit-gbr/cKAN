@@ -129,8 +129,14 @@ RUN mkdir $SRC_EXTENSIONS_DIR
 COPY setup/start_ckan_development.sh ${APP_DIR}
 RUN chmod u+x ${APP_DIR}/start_ckan_development.sh
 
-# helper script for database
+# helper script to wait for database
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
+
+# Patch CKAN https://github.com/ckan/ckan/issues/4576
+# check and maybe remove with next version!
+COPY patches/flask_app.patch ${SRC_DIR}/ckan
+RUN cd ${SRC_DIR}/ckan && git apply -v flask_app.patch && cd -
+
 
 CMD ["/srv/app/start_ckan_development.sh"]

@@ -100,9 +100,14 @@ ONBUILD RUN mkdir /docker-entrypoint.d
 RUN chown -R ckan:ckan ${APP_DIR}
 RUN chmod u+x /srv/app/start_ckan.sh
 
-# helper script for database
+# helper script to wait for database
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
+
+# Patch CKAN https://github.com/ckan/ckan/issues/4576
+# check and maybe remove with next version!
+COPY patches/flask_app.patch ${SRC_DIR}/ckan
+RUN cd ${SRC_DIR}/ckan && git apply -v flask_app.patch && cd -
 
 EXPOSE 5000
 
