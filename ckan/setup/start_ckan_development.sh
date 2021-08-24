@@ -80,6 +80,10 @@ fi
 # Start supervisord
 supervisord --configuration /etc/supervisord.conf &
 
+# Fix DB iniit - Why do we need it here?
+echo "Reeinit Database"
+ckan db init
+
 # Start the development server with automatic reload
 # Check the --reloader options sudo -u ckan -EH ckan -c $CKAN_INI run --reloader <TEXT>
 sudo -u ckan -EH ckan -c $CKAN_INI run --host 0.0.0.0
