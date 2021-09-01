@@ -86,6 +86,21 @@ services:
     labels:
       - traefik.enable=false
 
+  ckan_service:
+    container_name: ckan_service
+    build:
+      context: ckan_service/
+      dockerfile: Dockerfile
+      args:
+        - TZ=${TZ}
+    env_file:
+      - .env
+    networks:
+      - http
+      - local
+    labels:
+      - traefik.enable=false
+
   datapusher:
     container_name: datapusher
     image: keitaro/ckan-datapusher:0.0.17
