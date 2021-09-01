@@ -83,6 +83,7 @@ services:
       - "0.0.0.0:${CKAN_PORT}:5000"
     volumes:
       - ckan_storage:/var/lib/ckan
+      - api_share:/usr/share/api_share
     labels:
       - traefik.enable=false
 
@@ -100,6 +101,8 @@ services:
       - local
     labels:
       - traefik.enable=false
+    volumes:
+      - api_share:/usr/share/api_share
 
   datapusher:
     container_name: datapusher
@@ -163,6 +166,7 @@ volumes:
   ckan_storage:
   pg_data:
   solr_data:
+  api_share:
 
 networks:
   local:
