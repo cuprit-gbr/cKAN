@@ -142,6 +142,8 @@ services:
       - local
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "ckan"]
+    ports:
+      - "127.0.0.1:5432:5432"
 
   solr:
     container_name: solr
