@@ -1,4 +1,4 @@
 #!/bin/sh
 SHARED_TOKEN=$(tail -n1 /usr/share/api_share/token | awk '{$1=$1;print}')
 date >> /tmp/run
-curl -s -H "Authorization: ${SHARED_TOKEN}" -d {} ${CKAN_SITE_URL}/api/action/send_email_notifications >> /tmp/run
+curl -s -H "Authorization: ${SHARED_TOKEN}" -d {} ${CKAN_SITE_URL}/api/action/send_email_notifications
