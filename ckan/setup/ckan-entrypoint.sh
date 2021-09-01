@@ -79,6 +79,8 @@ if ckan --config "$CONFIG" user show ${CKAN_SYSADMIN_NAME} | grep -q 'User: None
     echo "Creating sysadmin user"
     ckan --config "$CONFIG" user add ${CKAN_SYSADMIN_NAME} email=${CKAN_SYSADMIN_EMAIL} name=${CKAN_SYSADMIN_NAME} password=${CKAN_SYSADMIN_PASSWORD}
     ckan --config "$CONFIG" sysadmin add ${CKAN_SYSADMIN_NAME}
+    # generate API token, this will be shared via a volume with ckan_service
+    ckan --config "$CONFIG" user token add ${CKAN_SYSADMIN_NAME} startup_created > /usr/share/api_share/token
 fi
 
 # update plugins
