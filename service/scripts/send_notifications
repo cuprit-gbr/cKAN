@@ -1,3 +1,3 @@
 #!/bin/sh
 date >> /tmp/run
-curl -s -H "Authorization: ${API_TOKEN}" -d {} http://ckan:5000/api/action/send_email_notifications >> /tmp/run
+curl -s -H "Authorization: ${API_TOKEN}" -d {} ${CKAN_SITE_URL}/api/action/send_email_notifications >> /tmp/run
