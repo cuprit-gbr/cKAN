@@ -15,7 +15,7 @@ services:
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --providers.docker.exposedbydefault=false
-      - --certificatesresolvers.leresolver.acme.email=me@example.com
+      - --certificatesresolvers.leresolver.acme.email=toni.schoenbuchner@cuprit.net
       - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.leresolver.acme.tlschallenge=true
     restart: unless-stopped
