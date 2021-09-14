@@ -43,7 +43,8 @@ RUN apk add --no-cache tzdata \
         g++ \
         autoconf \
         automake \
-	    libtool \
+	      libtool \
+	      openldap-dev \
         python3-dev \
         py3-virtualenv \
         libxml2-dev \
@@ -65,15 +66,18 @@ RUN cd ${APP_DIR} && \
 ENV PATH=${APP_DIR}/bin:${PATH}
 
 # Install CKAN and uwsgi
-RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
+RUN pip3 install --upgrade pip && \
+    pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     pip3 install uwsgi && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
-    pip install --no-binary :all: -r requirements.txt && \
-    # Install CKAN envvars to support loading config from environment variables
-    pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
-    # Install ckanext-cuprit
-    pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
+    pip3 install --no-binary :all: -r requirements.txt && \
+    # Install CKAN extensions
+      pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+      pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
+      pip3 install -e git+https://github.com/NaturalHistoryMuseum/ckanext-ldap#egg=ckanext-ldap && \
+      pip3 install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
+      pip3 install -r ${SRC_DIR}/ckanext-dcat/requirements.txt && \
     # Create and update CKAN config
     ckan generate config ${CKAN_INI}
 
