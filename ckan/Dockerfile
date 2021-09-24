@@ -73,11 +73,12 @@ RUN pip3 install --upgrade pip && \
     cp who.ini ${APP_DIR} && \
     pip3 install --no-binary :all: -r requirements.txt && \
     # Install CKAN extensions
-      pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
-      pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
-      pip3 install -e git+https://github.com/NaturalHistoryMuseum/ckanext-ldap#egg=ckanext-ldap && \
-      pip3 install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
-      pip3 install -r ${SRC_DIR}/ckanext-dcat/requirements.txt && \
+    pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+    pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
+    pip3 install -e git+https://github.com/NaturalHistoryMuseum/ckanext-ldap#egg=ckanext-ldap && \
+    pip3 install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
+    pip3 install -r ${SRC_DIR}/ckanext-dcat/requirements.txt && \
+    pip3 install -e git+https://github.com/cuprit-gbr/ckanext-resource-type-validation.git#egg=ckanext-resource-type-validation && \
     # Create and update CKAN config
     ckan generate config ${CKAN_INI}
 
