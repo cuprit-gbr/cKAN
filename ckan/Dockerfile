@@ -111,8 +111,8 @@ RUN chmod +x /usr/bin/wait-for-databases
 
 # Patch CKAN https://github.com/ckan/ckan/issues/4576
 # check and maybe remove with next version!
-COPY patches/flask_app.patch ${SRC_DIR}/ckan
-RUN cd ${SRC_DIR}/ckan && git apply -v flask_app.patch && cd -
+COPY patches/. ${SRC_DIR}/ckan
+RUN cd ${SRC_DIR}/ckan && git apply -v flask_app.patch && git apply patch_system_info.patch && cd -
 
 EXPOSE 5000
 
