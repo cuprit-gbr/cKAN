@@ -65,6 +65,7 @@ services:
       dockerfile: Dockerfile
       args:
         - TZ=${TZ}
+      network: host
     env_file:
       - .env
     networks:
@@ -94,6 +95,7 @@ services:
       dockerfile: Dockerfile
       args:
         - TZ=${TZ}
+      network: host
     env_file:
       - .env
     networks:
