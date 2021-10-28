@@ -8,8 +8,8 @@ COPY scripts/send_notifications /etc/periodic/15min
 RUN chmod +x /etc/periodic/15min/send_notifications
 
 # Add Backup script
-COPY scripts/backup /etc/periodic/15min
-RUN chmod +x /etc/periodic/15min/backup
+COPY scripts/backup /etc/daily/15min
+RUN chmod +x /etc/periodic/daily/backup
 
 # Add postgres auth file
 COPY scripts/pgpass.txt /root/.pgpass
