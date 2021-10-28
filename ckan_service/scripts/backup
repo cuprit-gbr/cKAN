@@ -12,41 +12,42 @@ mkdir -p $OUT_DIR/databases
 LOGFILE="$OUT_DIR/ckan_backup.log"
 
 #HOW MANY BACKUPS TO KEEP
-  KEEP_NUM=3
+KEEP_NUM=3
 
 # CREATE LOG FILE
-  if [ ! -e "$LOGFILE" ]
-  then
-      echo "[INFO] Creating logfile $LOGFILE"
-      touch $LOGFILE
-      if [ "$?" -ne "0" ]
-      then
-          echo "[ERR] Cannot create logfile: $LOGFILE" 1>&2
-  	exit 1
-      fi
-  fi
+if [ ! -e "$LOGFILE" ]
+then
+    echo "[INFO] Creating logfile $LOGFILE"
+    touch $LOGFILE
+    if [ "$?" -ne "0" ]
+    then
+        echo "[ERR] Cannot create logfile: $LOGFILE" 1>&2
+	exit 1
+    fi
+fi
 
 # DATE FORMAT FUNCTION
 date_utc()
-  {
-  # Get current date in UTC (YYYY-MM-DDTHH:MM:SS-UTC)
-  DATE=`date -u +%Y-%m-%dT%H:%M:%S-UTC`
-  }
+{
+# Get current date in UTC (YYYY-MM-DDTHH:MM:SS-UTC)
+DATE=`date -u +%Y-%m-%dT%H:%M:%S-UTC`
+}
 
 # LOG FUNCTIONS
 log_info()
-  {
-  date_utc
-  echo "[$DATE][INFO] $1" | tee -a $LOGFILE
-  }
+{
+date_utc
+echo "[$DATE][INFO] $1" | tee -a $LOGFILE
+}
 
 log_error()
-  {
-  date_utc
-  echo "[$DATE][ERR] $1" | tee -a $LOGFILE
-  }
+{
+date_utc
+echo "[$DATE][ERR] $1" | tee -a $LOGFILE
+}
 
 date_utc
+
 # Ouput file name (Do not change this)
 OUT_FILENAME_CKAN="ckan_backup-$DATE.sql"
 OUT_FILENAME_DATASTORE="datastore_backup-$DATE.sql"
@@ -145,32 +146,32 @@ remove_backups()
 log_info "-- remove backups is currently disabled "
 
 # BACKUP CKAN DATABASE
-  OUT_CKAN="$OUT_DIR/$OUT_FILENAME_CKAN"
-  log_info "Backing up database ckan to file: $OUT_CKAN"
-  pg_dump -h db -U ckan ckan -f"$OUT_CKAN" 1>&2 | tee -a $LOGFILE
-  if [ "$?" -ne "0" ]
-  then
-      log_error "Database 'ckan' backup creation failed with exit status: $?"
-      exit 1
-  else
-      log_info "Created backup of database 'ckan' with size: `du -h $OUT_CKAN`"
-  fi
+OUT_CKAN="$OUT_DIR/$OUT_FILENAME_CKAN"
+log_info "Backing up database ckan to file: $OUT_CKAN"
+pg_dump -h db -U ckan ckan -f"$OUT_CKAN" 1>&2 | tee -a $LOGFILE
+if [ "$?" -ne "0" ]
+then
+    log_error "Database 'ckan' backup creation failed with exit status: $?"
+    exit 1
+else
+    log_info "Created backup of database 'ckan' with size: `du -h $OUT_CKAN`"
+fi
 
 # BACKUP DATASTORE DATABASE
-  OUT_DATASTORE="$OUT_DIR/$OUT_FILENAME_DATASTORE"
-  echo $PGPASSWORD
-  echo "###"
-  echo pg_dump -h db -h db -U ckan datastore -f"$OUT_DATASTORE"
+OUT_DATASTORE="$OUT_DIR/$OUT_FILENAME_DATASTORE"
+echo $PGPASSWORD
+echo "###"
+echo pg_dump -h db -h db -U ckan datastore -f"$OUT_DATASTORE"
 
-  log_info "Backing up database ckan to file: $OUT_DATASTORE"
-  pg_dump -h db -h db -U ckan datastore -f"$OUT_DATASTORE" 1>&2 | tee -a $LOGFILE
-  if [ "$?" -ne "0" ]
-  then
-      log_error "Database 'datastore' backup creation failed with exit status: $?"
-      exit 1
-  else
-      log_info "Created backup of database 'datastore' with size: `du -h $OUT_DATASTORE`"
-  fi
+log_info "Backing up database ckan to file: $OUT_DATASTORE"
+pg_dump -h db -h db -U ckan datastore -f"$OUT_DATASTORE" 1>&2 | tee -a $LOGFILE
+if [ "$?" -ne "0" ]
+then
+    log_error "Database 'datastore' backup creation failed with exit status: $?"
+    exit 1
+else
+    log_info "Created backup of database 'datastore' with size: `du -h $OUT_DATASTORE`"
+fi
 
 # SYNCHONIZE STATIC FILES
 log_info "Sync static directories"
@@ -197,7 +198,6 @@ then
     log_error "Deletion of temporary .sql files failed with exit status: $?"
     exit 1
 fi
-
 
 # FINISH SCRIPT
 log_info "### Backup script Finished without errors"
