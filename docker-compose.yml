@@ -105,6 +105,8 @@ services:
       - traefik.enable=false
     volumes:
       - api_share:/usr/share/api_share
+      - ckan_storage:/var/lib/ckan_static_data
+      - ./backups:/var/ckan/backups
 
   datapusher:
     container_name: datapusher

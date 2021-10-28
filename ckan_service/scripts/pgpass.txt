@@ -1,0 +1,2 @@
+db:5432:ckan:user:pass
+db:5432:datastore:user:pass

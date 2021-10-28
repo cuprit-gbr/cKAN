@@ -1,14 +1,21 @@
-FROM alpine:3.7
+FROM alpine:3.10.9
 
 RUN apk update
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl bash postgresql-client rsync
 
 # Add Notifications script
 COPY scripts/send_notifications /etc/periodic/15min
 RUN chmod +x /etc/periodic/15min/send_notifications
 
+# Add Backup script
+COPY scripts/backup /etc/periodic/15min
+RUN chmod +x /etc/periodic/15min/backup
+
+# Add postgres auth file
+COPY scripts/pgpass.txt /root/.pgpass
+
 # Add entrypoint
 COPY scripts/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
