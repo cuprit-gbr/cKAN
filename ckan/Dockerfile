@@ -8,7 +8,7 @@ ENV PIP_SRC=${SRC_DIR}
 ENV CKAN_STORAGE_PATH=/var/lib/ckan
 ENV GIT_URL=https://github.com/ckan/ckan.git
 # CKAN version to build
-ENV GIT_BRANCH=ckan-2.9.3
+ENV GIT_BRANCH=ckan-2.9.4
 
 WORKDIR ${APP_DIR}
 
@@ -55,6 +55,7 @@ RUN apk add --no-cache tzdata \
     # Install pip
     curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
     python3 ${SRC_DIR}/get-pip.py 'pip==20.3.3' && \
+    pip install --upgrade pip && \
     rm -rf ${SRC_DIR}/get-pip.py
 
 # Set up Python3 virtual environment
@@ -79,6 +80,7 @@ RUN pip3 install --upgrade pip && \
     pip3 install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
     pip3 install -r ${SRC_DIR}/ckanext-dcat/requirements.txt && \
     pip3 install -e git+https://github.com/cuprit-gbr/ckanext-resource-type-validation.git#egg=ckanext-resource-type-validation && \
+    pip3 install -r ${SRC_DIR}/ckanext-resource-type-validation/requirements.txt && \
     # Create and update CKAN config
     ckan generate config ${CKAN_INI}
 
@@ -108,11 +110,6 @@ RUN chmod u+x /srv/app/start_ckan.sh
 # helper script to wait for database
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
-
-# Patch CKAN https://github.com/ckan/ckan/issues/4576
-# check and maybe remove with next version!
-COPY patches/. ${SRC_DIR}/ckan
-RUN cd ${SRC_DIR}/ckan && git apply -v flask_app.patch && git apply patch_system_info.patch && cd -
 
 EXPOSE 5000
 
