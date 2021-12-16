@@ -78,6 +78,7 @@ RUN pip3 install --upgrade pip && \
     pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
     pip3 install -e git+https://github.com/NaturalHistoryMuseum/ckanext-ldap#egg=ckanext-ldap && \
     pip3 install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
+    pip3 install -e git+https://github.com/fwoerister/ckanext-archiveview#egg=ckanext-archiveview && \
     pip3 install -r ${SRC_DIR}/ckanext-dcat/requirements.txt && \
     pip3 install -e git+https://github.com/cuprit-gbr/ckanext-resource-type-validation.git#egg=ckanext-resource-type-validation && \
     # Create and update CKAN config
