@@ -159,6 +159,9 @@ services:
       - solr_data:/opt/solr/server/solr/ckan/data
     labels:
       - traefik.enable=false
+    environment:
+      - Dlog4j2.formatMsgNoLookups=true
+      - LOG4J_FORMAT_MSG_NO_LOOKUPS=true
 
   redis:
     container_name: redis
