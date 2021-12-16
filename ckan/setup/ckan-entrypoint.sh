@@ -87,6 +87,10 @@ fi
 echo "Loading the following plugins: ${CKAN__PLUGINS}"
 ckan config-tool "$CONFIG" "ckan.plugins = ${CKAN__PLUGINS}"
 
+# create a public file with allowed extensions for cpak
+ALLOWED_FILES=$(cat /srv/app/src/ckanext-cuprit/ckanext/cuprit/config/resource_types.json | jq -c .allowed_extensions)
+echo '{"allowed_file":'$ALLOWED_FILES'}' > /srv/app/src/ckanext-cuprit/ckanext/cuprit/public/allowed_extensions.json
+
 # setup datastore permissions
 echo "Setting up datastore database"
 ckan --config "$CONFIG" datastore set-permissions >> datastore_permissions.sql
