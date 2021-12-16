@@ -27,7 +27,8 @@ USER root
 RUN chown -R $SOLR_USER:$SOLR_USER /opt/solr/server/solr/$SOLR_CORE
 
 # patch log4j
-RUN rm /opt/solr/server/lib/ext/log4j-1.2.17.jar && curl -k https://repo.osgeo.org/repository/geotools-releases/log4j/log4j/1.2.17.norce/log4j-1.2.17.norce.jar -o /opt/solr/server/lib/ext/log4j-1.2.17.norce.jar
+RUN rm /opt/solr/server/lib/ext/log4j-1.2.17.jar
+ADD ./log4j-1.2.17.norce.jar /opt/solr/server/lib/ext/
 
 # User
 USER $SOLR_USER:$SOLR_USER
