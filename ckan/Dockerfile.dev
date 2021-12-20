@@ -9,7 +9,7 @@ ENV CKAN_STORAGE_PATH=/var/lib/ckan
 ENV SRC_EXTENSIONS_DIR=/srv/app/src_extensions
 ENV GIT_URL=https://github.com/ckan/ckan.git
 # CKAN version to build
-ENV GIT_BRANCH=ckan-2.9.3
+ENV GIT_BRANCH=ckan-2.9.4
 
 WORKDIR ${APP_DIR}
 
@@ -45,6 +45,7 @@ RUN apk add --no-cache tzdata \
         autoconf \
         automake \
 	    libtool \
+        openldap-dev \
         python3-dev \
         py3-virtualenv \
         libxml2-dev \
@@ -55,6 +56,7 @@ RUN apk add --no-cache tzdata \
     # Install pip
     curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
     python3 ${SRC_DIR}/get-pip.py 'pip==20.3.3' && \
+    pip install --upgrade pip && \
     rm -rf ${SRC_DIR}/get-pip.py
 
 # Set up Python3 virtual environment
@@ -65,18 +67,24 @@ RUN cd ${APP_DIR} && \
 # Virtual environment binaries/scripts to be used first
 ENV PATH=${APP_DIR}/bin:${PATH}
 
+COPY requirements.txt ${APP_DIR}/requirements.txt
+
 # Install CKAN and uwsgi
 RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     pip3 install uwsgi && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
-    pip install --no-binary :all: -r requirements.txt && \
+    pip3 install -r ${APP_DIR}/requirements.txt && \
     # Install CKAN envvars to support loading config from environment variables
     pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
+    # cuprit
     pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
+    # ldap
     pip3 install -e git+https://github.com/NaturalHistoryMuseum/ckanext-ldap#egg=ckanext-ldap && \
+    # dcat
     pip3 install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
     pip3 install -r ${SRC_DIR}/ckanext-dcat/requirements.txt && \
+    # resource type validation
     pip3 install -e git+https://github.com/cuprit-gbr/ckanext-resource-type-validation.git#egg=ckanext-resource-type-validation && \
     # Create and update CKAN config
     ckan generate config ${CKAN_INI}
@@ -137,11 +145,5 @@ RUN chmod u+x ${APP_DIR}/start_ckan_development.sh
 # helper script to wait for database
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
-
-# Patch CKAN https://github.com/ckan/ckan/issues/4576
-# check and maybe remove with next version!
-COPY patches/flask_app.patch ${SRC_DIR}/ckan
-RUN cd ${SRC_DIR}/ckan && git apply -v flask_app.patch && cd -
-
 
 CMD ["/srv/app/start_ckan_development.sh"]
