@@ -65,12 +65,16 @@ RUN cd ${APP_DIR} && \
 # Virtual environment binaries/scripts to be used first
 ENV PATH=${APP_DIR}/bin:${PATH}
 
+COPY requirements.txt ${APP_DIR}/requirements.txt
+
 # Install CKAN and uwsgi
-RUN pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
+RUN pip3 install --upgrade pip && \
+    pip3 install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan && \
     pip3 install uwsgi && \
     cd ${SRC_DIR}/ckan && \
     cp who.ini ${APP_DIR} && \
-    pip install --no-binary :all: -r requirements.txt && \
+    pip3 install python-dateutil==2.8.2 && \
+    pip3 install --no-binary :all: -r ${APP_DIR}/requirements.txt && \
     # Install CKAN envvars to support loading config from environment variables
     pip3 install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars && \
     pip3 install -e git+https://github.com/cuprit-gbr/ckanext-cuprit#egg=ckanext-cuprit && \
