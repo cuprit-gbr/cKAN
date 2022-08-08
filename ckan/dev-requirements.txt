@@ -9,7 +9,7 @@ freezegun==1.1.0
 ipdb==0.13.9
 responses==0.13.1
 requests==2.26.0
-pycodestyle==2.7.0
+pycodestyle==2.9.1
 pip-tools==6.4.0
 Sphinx==1.8.5
 sphinx-rtd-theme==0.4.3
