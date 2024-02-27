@@ -66,6 +66,7 @@ services:
     volumes:
       - ckan_storage:/var/lib/ckan
       - ./src:/srv/app/src_extensions
+      # add your extensions here
 
     labels:
       - traefik.enable=false
